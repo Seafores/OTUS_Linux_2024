@@ -1,0 +1,25 @@
+- name: "install and configure nginx"
+  hosts: nginx
+  become: true
+  vars:
+    nginx_listen_port: 8080
+
+  tasks:
+    - name: "Update repositories cache and install nginx package"
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: "Template nginx config file to /etc/nginx/nginx.conf"
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: "Restart nginx"
+
+  handlers:
+    - name: "Restart nginx"
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
