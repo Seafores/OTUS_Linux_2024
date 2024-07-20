@@ -8,44 +8,44 @@ SERVERS =
    :CPU => '2',
    :HDDALL =>
      {
-       :HDD1 =>
+        :HDD1 =>
          {
            :HDDNAME => './hw4_1_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 1
          },
-       :HDD2 =>
+        :HDD2 =>
          {
            :HDDNAME => './hw4_2_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 2
          },
-       :HDD3 =>
+        :HDD3 =>
          {
            :HDDNAME => './hw4_3_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 3
          },
-       :HDD4 =>
+        :HDD4 =>
          {
            :HDDNAME => './hw4_4_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 4
          },
-       :HDD5 =>
+        HDD5 =>
          {
            :HDDNAME => './hw4_5_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 5
          },
-       :HDD6 =>
+        :HDD6 =>
          {
            :HDDNAME => './hw4_6_hdd.vdi',
            :HDD_SIZE => 256,
            :PORT => 6
          }
-     }
- }
+      }
+  }
 ]
 
 # Входим в Главную конфигурацию Vagrant версии 2
