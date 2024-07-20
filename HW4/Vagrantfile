@@ -1,0 +1,105 @@
+SERVERS =
+[
+ {
+   :BOX_NAME => 'BaseALT/alt-server-10-amd64',
+   :HOSTNAME => 'mdadm',
+   :IP => '192.168.56.10',
+   :RAM => 2048,
+   :CPU => '2',
+   :HDDALL =>
+     {
+       :HDD1 =>
+         {
+           :HDDNAME => './hw4_1_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 1
+         },
+       :HDD2 =>
+         {
+           :HDDNAME => './hw4_2_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 2
+         },
+       :HDD3 =>
+         {
+           :HDDNAME => './hw4_3_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 3
+         },
+       :HDD4 =>
+         {
+           :HDDNAME => './hw4_4_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 4
+         },
+       :HDD5 =>
+         {
+           :HDDNAME => './hw4_5_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 5
+         },
+       :HDD6 =>
+         {
+           :HDDNAME => './hw4_6_hdd.vdi',
+           :HDD_SIZE => 256,
+           :PORT => 6
+         }
+     }
+ }
+]
+
+# Входим в Главную конфигурацию Vagrant версии 2
+Vagrant.configure('2') do |config|
+ # Проходим по элементах массива SERVERS
+ SERVERS.each do |machine|
+   # Применяем конфигурации для каждой машины
+   config.vm.define machine[:HOSTNAME] do |node|
+     # Создаем box
+     node.vm.box = machine[:BOX_NAME]
+     # Hostname который будет присвоен VM (самой ОС)
+     node.vm.hostname = machine[:HOSTNAME]
+     # Добавление и настройка внутреннего сетевого адаптера
+     node.vm.network 'private_network', ip: machine[:IP]
+     # Тонкие настройки (VirtualBox)
+     node.vm.provider :virtualbox do |vb|
+       # Размер RAM памяти
+       vb.customize ['modifyvm', :id, '--memory', machine[:RAM]]
+       # Количество CPU
+       vb.customize ['modifyvm', :id, '--cpus', machine[:CPU]]
+       # Перезапись названия VM в Vbox GUI
+       vb.name = machine[:HOSTNAME]
+       # none
+       # needsController = false
+       #Счетчик для новых HDD
+       hddnew = 0
+       # Проверка всех HDD (HDDALL)
+       machine[:HDDALL].each do |hddcurrent, hddconfig|
+         # Если диска не существует, создать
+         unless File.exist?(hddconfig[:HDDNAME])
+           vb.customize ['createhd', '--filename', hddconfig[:HDDNAME], '--variant', 'Fixed', '--size', hddconfig[:HDD_SIZE]]
+           hddnew = hddnew + 1
+         end
+       end
+       if hddnew >= 1
+         needsController = true
+       end
+       # Если диск был создан, подключаем
+       if needsController == true
+         vb.customize ["storagectl", :id, "--name", "SATA", "--add", "SATA"]
+         machine[:HDDALL].each do |hddcurrent, hddconfig|
+           vb.customize ['storageattach', :id, '--storagectl', 'SATA', '--port', hddconfig[:PORT], '--device', 0, '--type', 'hdd', '--medium', hddconfig[:HDDNAME]]
+         end
+       end
+     end
+     # Настройки SSH
+     node.vm.provision "shell", inline: <<-SHELL
+       mkdir -p ~root/.ssh
+       cp ~vagrant/.ssh/auth* ~root/.ssh
+       sudo sed -i 's/\#PasswordAuthentication no/PasswordAuthentication yes/g' /etc/openssh/sshd_config
+       systemctl restart sshd
+       #mdadm --zero-superblock --force /dev/sd{b,c}
+       #mdadm --create /dev/md1 --level=1 --raid-devices=2 /dev/sdb /dev/sdc --metadata=0.90
+     SHELL
+   end
+ end
+end
