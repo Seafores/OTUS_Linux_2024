@@ -107,6 +107,8 @@ Vagrant.configure('2') do |config|
        cp ~vagrant/.ssh/auth* ~root/.ssh
        sudo sed -i 's/\#PasswordAuthentication no/PasswordAuthentication yes/g' /etc/openssh/sshd_config
        systemctl restart sshd
+       apt-get update
+       apt-get install kernel-modules-zfs-std-def zfs-utils wget
      SHELL
    end
  end
