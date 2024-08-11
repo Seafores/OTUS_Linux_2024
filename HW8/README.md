@@ -213,10 +213,15 @@ EOF
 ```
 
 
+Включаем nginx
+```
+[root@rpms nano-8.1]# systemctl start nginx
+```
+
 
 Проверяем что репозиторий появился и видно один новый пакет:
 ```
-[root@rpms html]# yum repolist | grep nano
+[root@rpms nano-8.1]# yum repolist | grep nano
 nano_local    nano_local Repos    1
 ```
 
